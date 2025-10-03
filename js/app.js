@@ -459,7 +459,7 @@ class Trainer {
     const midis = rel.map(r => root + r)
                      .filter(m => m >= this.settings.midiLow && m <= this.settings.midiHigh);
 
-    this.current = { rel, root, midis, answered: false 
+    this.current = { rel, root, midis, answered: false };
    this._replayChordCount = 0;  // reset per question
     this._replayGuessCount = 0;  // reset per question       
     if (midis.length > 0) this.synth.playChord(midis, this.settings.duration);
@@ -1081,7 +1081,6 @@ window.addEventListener('keydown', e => {
 if (el.guessInput) {
   el.guessInput.addEventListener("keydown", e => {
     // ignore auto-repeat to avoid machine-gunning when holding Enter
-    if (e.repeat) return;
 
     if (e.repeat) return; // avoid auto-repeat
 
