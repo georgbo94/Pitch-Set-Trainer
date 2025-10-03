@@ -19,7 +19,7 @@ const DEFAULTS = {
   aim: 0.8,
   win: 10,
   arpEvery: 3,      // arpeggiate every Nth replay (0 = never)
-  arpNoteDur: 0.18, // seconds per arpeggio note
+  arpNoteDur: 0.3, // seconds per arpeggio note
 };
 
 /* -------------------------
@@ -191,7 +191,7 @@ if (!Synth._unlockInstalled) {
         const g = this.ctx.createGain();
         osc.type = "sine";
         osc.frequency.value = f0 * h;
-        g.gain.value = 1 / (h**1.2);
+        g.gain.value = 1 / (h**1.8);
         osc.connect(g).connect(masterGain);
         osc.start(now);
         osc.stop(now + dur);
@@ -923,14 +923,21 @@ window.addEventListener('keydown', e => {
     function formatSet(arr) { return "(" + arr.join(", ") + ")"; }
   
     let msg = "";
-    if (ok) {
-      msg = `
-        <div style="text-align:center;">
-          🐢🐢 <span style="color:rgb(48, 134, 48)">${formatSet(truth)}</span>
-        </div>`;
-      if (el.replaySetBtn) el.replaySetBtn.classList.add("btn-green");
-      if (el.submitBtn) el.submitBtn.classList.add("btn-green");
-    } else {
+if (ok) {
+  const animals = ["🦚","🐢","🦜","🐧	","🐤","🦔","🦩","🦥","🦨"];
+  const left  = animals[Math.floor(Math.random() * animals.length)];
+  let right   = animals[Math.floor(Math.random() * animals.length)];
+  if (right === left && animals.length > 1) {
+    right = animals[(animals.indexOf(left) + 1) % animals.length];
+  }
+
+  msg = `
+    <div style="text-align:center;">
+      ${left} <span style="color:rgb(48, 134, 48)">${formatSet(truth)}</span> ${right}
+    </div>`;
+  if (el.replaySetBtn) el.replaySetBtn.classList.add("btn-green");
+  if (el.submitBtn) el.submitBtn.classList.add("btn-green");
+} else {
       msg = `
         <div style="text-align:center;">
           🙉 <span style="color:rgb(160, 68, 50)">${formatSet(guess)}</span> 
