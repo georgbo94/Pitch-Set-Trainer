@@ -667,6 +667,7 @@ if (el.mixRatio) {
       renderSettingsUI(trainer.settings);
       trainer.changeSettings(readSettingsFromUI());
       updateButtons();
+      Storage.save(currentUser, trainer.snapshotForSave());
     });
   });
 
@@ -993,7 +994,9 @@ window.addEventListener('keydown', e => {
       if (el.guessInput) { el.guessInput.value = ""; el.guessInput.disabled = true; }
       if (el.newSetBtn) el.newSetBtn.disabled = false;
       updateButtons();
-      focusAfterEnterReleased(el.newSetBtn);    } else {
+      focusAfterEnterReleased(el.newSetBtn);
+    Storage.save(currentUser, trainer.snapshotForSave());
+    } else {
       const last = trainer.log[trainer.log.length - 1];
       if (last) trainer.playGuess(last.guess);
     }
@@ -1089,7 +1092,9 @@ function focusAfterEnterReleased(elem) {
 updateButtons();
 
 
-
+window.addEventListener("beforeunload", () => {
+  try { Storage.save(currentUser, trainer.snapshotForSave()); } catch {}
+});
    
 })();
 
