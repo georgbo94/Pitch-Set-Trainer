@@ -1,31 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GitHub page as PWA template</title>
+  <title>Pitch Set Trainer</title>
+
+  <!-- PWA support -->
+
   <link rel="canonical" href="https://github.com/georgbo94/Pitch-Set-Trainer/" />
   <link rel="manifest" href="https://github.com/georgbo94/Pitch-Set-Trainer/manifest.webmanifest">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
  
-  <h1>GitHub page as PWA template</h1>
-  <p>
-    This is a PWA template for GitHub pages. 
-    Make sure to check the README at 
-    <a href="https://github.com/georgbo94/Pitch-Set-Trainer/">https://github.com/georgbo94/Pitch-Set-Trainer/</a> and 
-    to change the necessary settings to your needs.
-  </p>
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- 🎨 Mobile-friendly rectangular styling -->
+  <style>
+html, body {
+  height: 100%;        /* fill the viewport */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;    /* 🚫 disable body scroll */
+  position: fixed;        /* 🚫 pin to viewport */
+  top: 0; left: 0; right: 0; bottom: 0;
+  overscroll-behavior: none; /* 🚫 disable iOS/Chrome “rubber band” */
+}
+
+body {
+  font-family: monospace;
+  font-size: 18px;
+  line-height: 1.4;
+  background: #fafafa;
+  color: #222;
+
+  display: flex;
+  justify-content: flex-start; /* keep your “phone-on-left” look */
+  padding: 0.05rem 0.05rem 0.05rem 1.5rem ;             /* keep small padding if you want */
+}
+
+main {
+  flex: 1;              /* take up all available vertical space */
+  display: flex;
+  flex-direction: column;
+/*  overflow-y: auto;     /* ✅ only scroll here if content actually exceeds screen */
+  overflow: hidden;
+}
+
+
+/* Default: no underline (safe fallback) */
+.accesskey-u { text-decoration: none; }
+
+/* Show underline only on devices likely to have a keyboard/mouse */
+@media (any-hover: hover) and (any-pointer: fine) {
+  .accesskey-u { text-decoration: underline; }
+}
+
+/* Ensure hidden on coarse/touch pointers (redundant but explicit) */
+@media (hover: none), (pointer: coarse) {
+  .accesskey-u { text-decoration: none; }
+}
+
+/* scaling when screen smaller than design */
+@media (max-width: 336px) {
+  main {
+    transform: scale(calc(100vw / 336));
+    transform-origin: top left;
+  }
+}
+
+#feedbackBox {
+  margin-left: 0rem;
+  flex-shrink: 0;         
+  padding: 0.2rem;
+  border-top: none;
+  background:#fafafa;
+  font-size: 1rem;
+  line-height: 1.3;
+  width: 20rem;       /* fixed width */
+  min-height: 8rem;   /* reserve space */
+  overflow: visible;  /* show all content */
+}
+
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      margin: 1rem 0 0.5rem;
+    }
+
+    /* Base reset for inputs, selects, buttons */
+    button,
+select,
+input {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  color: #000;
+  padding: 0.4rem 0.6rem;
+  box-sizing: border-box;
+  font-family: inherit;   /* 🔥 make them use body font (monospace) */
+}
+
+    /* General button look */
+    button {
+      background: #eee;
+      min-height: 44px;
+    }
+    
+    button:disabled {
+      background: #f5f5f5;
+      color: #999;
+      border: 1px solid #ddd;
+    }
+
+    /* Controls section in 2x2 grid */
+    #controls {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 0.5rem 1rem;
+      margin-top: 1rem;
+      width: max-content;      /* ✅ only as wide as its children */
+      justify-content: start;  /* ✅ align to left */
+    }
+
+#controls button,
+#controls input {
+  width: 9.6rem;
+  height: 2.5rem;
+  font-size: 1rem;
+  font-family: inherit;   /* ✅ unify font */
+  line-height: 1.2;       /* ✅ consistent baseline */
+  padding: 0;             /* ✅ no extra inside space */
+  border: 1px solid #ccc; /* ✅ identical border */
+  box-sizing: border-box; /* ✅ height includes border */
+  text-align: center;
+  margin-left:0.2rem;
+}
+
+    /* Pitch set input narrower font */
+#guessInput {
+  font-family: monospace; /* if you want different font */
+}
+#feedback,
+#summary {
+  min-height: 0 rem;    /* reserve space */
+  margin: 0;           /* remove default p margins */
+  padding-top: 0.5rem; /* small consistent spacing if you want */
+}
+    
+    /* Shorter Delete button */
+    #deleteUserBtn {
+      width: 5rem;
+    }
+
+.section-line {
+  height: 2px;
+  background: linear-gradient(to right, #ccc, #666, #ccc); /* nice fade effect */
+  margin: 0.5rem 0 0.5rem 0;
+  width: 21rem;   /* only as wide as content */
+  min-width: 8rem;      /* ensures it’s not too tiny */
+}
+
+button:active,
+button.force-active {
+  transform: scale(0.95);
+  transition: transform 0.5s;
+}
+
+button:active,
+button.pressed {
+  background: #ccc;
+}
+
+.btn-green {
+  background: rgb(104, 180, 104);
+  color: white;
+}
+.btn-red {
+  background: rgb(160, 68, 50);
+  color: white;
+}
+
+.btn-green:active,
+.btn-green.pressed {
+  background: rgb(63, 111, 63);
+}
+.btn-red:active,
+.btn-red.pressed {
+  background: rgb(122, 52, 38);
+}
+
+/* Unified focus style for interactive elements */
+/* unified rule: applies for keyboard focus and programmatic focus alike */
+@media (any-hover: hover) and (any-pointer: fine) {
+  button:focus,
+  button:focus-visible,
+  input:focus,
+  input:focus-visible,
+  select:focus,
+  select:focus-visible,
+  textarea:focus,
+  textarea:focus-visible {
+    outline: 2px solid rgb(70, 74, 70) !important;
+    outline-offset: 2px !important;
+    border-radius: 0 !important;
+  }
+}
+
+
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>🎹 Pitch Set Trainer 🎺</h1>
+
+    <!-- User -->
+    <section id="userSection">
+      <table>
+        <tr>
+          <td>User:</td>
+          <td colspan="2">
+            <select id="userSelect" style="width:6rem;"></select>
+          </td>
+          <td><button id="newUserBtn">New User</button></td>
+          <td><button id="deleteUserBtn">Delete</button></td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- Settings -->
+    <section id="settings">
+      <div class="section-line"></div>
+      <table>
+        <tr>
+          <td># Notes:</td>
+          <td><select id="cardMin" style="width:4rem;"></select></td>
+          <td>–</td>
+          <td><select id="cardMax" style="width:4rem;"></select></td>
+        </tr>
+        <tr>
+          <td>Note Range:</td>
+          <td><select id="midiLow" style="width:4rem;"></select></td>
+          <td>–</td>
+          <td><select id="midiHigh" style="width:4rem;"></select></td>
+        </tr>
+        <tr>
+          <td>Voicing Span:</td>
+          <td><select id="spanMin" style="width:4rem;"></select></td>
+          <td>–</td>
+          <td><select id="spanMax" style="width:4rem;"></select></td>
+        </tr>
+        <tr>
+          <td>Harder Ratio:</td>
+          <td><select id="mixRatio" style="width:4rem;"></select></td>
+        </tr>
+      </table>
+    </section>
+    <div class="section-line"></div>
+
+    <!-- Controls -->
+    <section id="controls">
+      <button id="newSetBtn">▶ New Chord</button>
+      <button id="replaySetBtn" 
+      style="display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;">
+<span style="font-size:1.8em; line-height:1; display:inline-block; transform: translateY(-0.1em);">⟳</span>
+<span>Replay chord</span>
+</button>
+      <input type="text" inputmode="decimal" id="guessInput" placeholder="Enter Set…" enterkeyhint="Submit">
+      <button id="submitBtn">
+        Submit Guess <span style="font-size:1.3em; line-height:1;">⏎</span>
+      </button>    </section>
+    <div class="section-line"></div>
+
+    <div id="feedbackBox">
+      <div id="feedback"></div>
+      <div id="summary"></div>
+    </div>
+  </main>
 
   <script>
       if (navigator.serviceWorker) {
         navigator.serviceWorker.register (
-          '/github-page-pwa/sw.js',
-          {scope: '/github-page-pwa/'}
+          '/Pitch-Set-Trainer/sw.js',
+          {scope: '/Pitch-Set-Trainer/'}
         )
       }
   </script>
   <script src="js/app.js"></script>
 </body>
 </html>
+
+
+
+
+
