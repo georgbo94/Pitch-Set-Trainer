@@ -19,7 +19,7 @@ const DEFAULTS = {
   aim: 0.8,
   win: 10,
   arpEvery: 3,      // arpeggiate every Nth replay (0 = never)
-  arpNoteDur: 0.4, // seconds per arpeggio note
+  arpNoteDur: 0.6, // seconds per arpeggio note
 };
 
 /* -------------------------
