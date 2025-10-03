@@ -9,9 +9,9 @@
   "display": "standalone", 
   "icons": [
       {
-        "src": "/Pitch-Set-Trainer/img/icon.png",
+        "src": "/Pitch-Set-Trainer/icons/icon-512.png",
         "type": "image/png",
-        "sizes": "700x700"
+        "sizes": "512x512"
       }
   ]
 }
