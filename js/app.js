@@ -144,7 +144,7 @@ if (!Synth._unlockInstalled) {
         const g = this.ctx.createGain();
         osc.type = "sine";
         osc.frequency.value = f0 * h;
-        g.gain.value = 1 / h;
+        g.gain.value = 1 / (h**1.2);
         osc.connect(g).connect(masterGain);
         osc.start(now);
         osc.stop(now + dur);
