@@ -24,9 +24,9 @@ const DEFAULTS = {
    Storage
 ------------------------- */
 const STORAGE = {
-  CURRENT_USER: "eartrainer3_current_user",
-  USER_PREFIX: "eartrainer3_user_",
-  LAST_NON_GUEST_SETTINGS: "eartrainer3_last_non_guest_settings"
+  CURRENT_USER: "pitchsettrainer_current_user",
+  USER_PREFIX: "pitchsettrainer_user_",
+  LAST_NON_GUEST_SETTINGS: "pitchsettrainer_last_non_guest_settings"
 };
 
 const Storage = {
@@ -532,7 +532,7 @@ class Trainer {
     try {
       const css = "button:disabled{pointer-events:none!important;} select:disabled{pointer-events:none!important;}"; 
       const s = document.createElement("style");
-      s.setAttribute("data-eartrainer-safety","true");
+      s.setAttribute("data-pitchsettrainer-safety","true");
       s.appendChild(document.createTextNode(css));
       (document.head || document.documentElement).appendChild(s);
     } catch (e) {
