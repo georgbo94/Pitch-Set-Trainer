@@ -18,6 +18,8 @@ const DEFAULTS = {
   duration: 2.5,
   aim: 0.8,
   win: 10,
+  arpEvery: 3,      // arpeggiate every Nth replay (0 = never)
+  arpNoteDur: 0.18, // seconds per arpeggio note
 };
 
 /* -------------------------
@@ -116,6 +118,51 @@ if (!Synth._unlockInstalled) {
 }
   }
 
+  playArpeggio(midis, noteDur = DEFAULTS.arpNoteDur) {
+    if (!midis.length) return;
+
+    // stop anything currently sounding
+    this.currentNodes.forEach(n => { try { n.stop(); } catch {} });
+    this.currentNodes = [];
+
+    const now = this.ctx.currentTime;
+    const masterGain = this.ctx.createGain();
+    masterGain.connect(this.ctx.destination);
+
+    // schedule notes back-to-back; no overlap
+    midis.forEach((midi, idx) => {
+      const start = now + noteDur * idx;
+      const end   = start + noteDur;
+      const f0    = midiToHz(midi);
+
+      // compact ADSR that fits entirely inside [start, end]
+      const A = Math.min(0.02, noteDur * 0.25);
+      const D = Math.min(0.08, noteDur * 0.25);
+      const S = 0.75;
+      const R = Math.min(0.06, noteDur * 0.25);
+
+      for (let h = 1; h <= 11; h++) {
+        const osc = this.ctx.createOscillator();
+        const g   = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = f0 * h;
+
+        // envelope fits strictly within [start, end]
+        g.gain.setValueAtTime(0, start);
+        g.gain.linearRampToValueAtTime(1 / h, start + A);
+        g.gain.linearRampToValueAtTime(S / h, start + A + D);
+        g.gain.setValueAtTime(S / h, Math.max(start + A + D, end - R));
+        g.gain.linearRampToValueAtTime(0, end);
+
+        osc.connect(g).connect(masterGain);
+        osc.start(start);
+        osc.stop(end);
+
+        this.currentNodes.push(osc);
+      }
+    });
+  }
+   
   playChord(midis, dur = DEFAULTS.duration) {
     if (!midis.length) return;
 
@@ -204,7 +251,8 @@ class Trainer {
     this.universe = generateUniverse(this.settings);
     this.current = null;
     this.log = Array.isArray(initialLog) ? initialLog.slice() : [];
-
+    this._replayChordCount = 0;
+    this._replayGuessCount = 0;
     // RNG: allow optional seeded RNG via initialSettings.rng, otherwise Math.random
     this.rng = (initialSettings && typeof initialSettings.rng === 'function')
       ? initialSettings.rng
@@ -411,7 +459,9 @@ class Trainer {
     const midis = rel.map(r => root + r)
                      .filter(m => m >= this.settings.midiLow && m <= this.settings.midiHigh);
 
-    this.current = { rel, root, midis, answered: false };
+    this.current = { rel, root, midis, answered: false 
+   this._replayChordCount = 0;  // reset per question
+    this._replayGuessCount = 0;  // reset per question       
     if (midis.length > 0) this.synth.playChord(midis, this.settings.duration);
     return this.current;
   }
@@ -421,16 +471,37 @@ class Trainer {
       const playable = this.current.midis.filter(
         m => m >= this.settings.midiLow && m <= this.settings.midiHigh
       );
-      if (playable.length > 0) this.synth.playChord(playable, this.settings.duration);
+      if (playable.length > 0) {
+        if (this.current.answered) {
+          this._replayChordCount++;
+          const every = Math.max(0, Math.floor(this.settings.arpEvery || 0));
+          const useArp = every > 0 && (this._replayChordCount % every === 0);
+          if (useArp) this.synth.playArpeggio(playable, this.settings.arpNoteDur);
+          else this.synth.playChord(playable, this.settings.duration);
+        } else {
+          this.synth.playChord(playable, this.settings.duration);
+        }
+      }
     }
   }
+
 
   playGuess(guessRel) {
     if (!this.current) return;
     const root = this.current.root;
     const playable = guessRel.map(r => root + r)
       .filter(m => m >= this.settings.midiLow && m <= this.settings.midiHigh);
-    if (playable.length > 0) this.synth.playChord(playable, this.settings.duration);
+    if (playable.length > 0) {
+      if (this.current.answered) {
+        this._replayGuessCount++;
+        const every = Math.max(0, Math.floor(this.settings.arpEvery || 0));
+        const useArp = every > 0 && (this._replayGuessCount % every === 0);
+        if (useArp) this.synth.playArpeggio(playable, this.settings.arpNoteDur);
+        else this.synth.playChord(playable, this.settings.duration);
+      } else {
+        this.synth.playChord(playable, this.settings.duration);
+      }
+    }
   }
 
   // submit guess: parse, record in log, update per-rel buffer & reachedCount incrementally
