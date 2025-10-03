@@ -1,15 +1,15 @@
 {
-  "name": "Github Page PWA",
-  "short_name": "GPPWA",
-  "description": "Github Page as a Progressive Web App",
-  "scope": "/github-page-pwa/",
-  "start_url": "/github-page-pwa/",
+  "name": "Pitch Set Trainer",
+  "short_name": "PST",
+  "description": "Ear Training Web App",
+  "scope": "/Pitch-Set-Trainer/",
+  "start_url": "/Pitch-Set-Trainer/",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "display": "standalone", 
   "icons": [
       {
-        "src": "/github-page-pwa/img/icon.png",
+        "src": "/Pitch-Set-Trainer/img/icon.png",
         "type": "image/png",
         "sizes": "700x700"
       }
