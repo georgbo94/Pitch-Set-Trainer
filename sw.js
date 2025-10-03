@@ -1,5 +1,5 @@
-var GHPATH = '/github-page-pwa';
-var APP_PREFIX = 'gppwa_';
+var GHPATH = '/Pitch-Set-Trainer';
+var APP_PREFIX = 'pst_';
 var VERSION = 'version_002';
 var URLS = [    
   `${GHPATH}/`,
