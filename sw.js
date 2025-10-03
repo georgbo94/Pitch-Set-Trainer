@@ -4,8 +4,8 @@ var VERSION = 'version_002';
 var URLS = [    
   `${GHPATH}/`,
   `${GHPATH}/index.html`,
-  `${GHPATH}/css/styles.css`,
-  `${GHPATH}/img/icon.png`,
+  `${GHPATH}/icons/icon-192.png`,
+  `${GHPATH}/icons/icon-512.png`,
   `${GHPATH}/js/app.js`
 ]
 
