@@ -83,6 +83,20 @@ const Storage = {
   }
 };
 
+
+// then request persistence early
+(async () => {
+  if (navigator.storage && navigator.storage.persist) {
+    try {
+      const granted = await navigator.storage.persist();
+      console.log('Persistence granted?', granted);
+    } catch (err) {
+      console.warn('Persistence request failed:', err);
+    }
+  }
+})();
+
+
 /* -------------------------
    Synth (safe gain + iOS BT fixes)
 ------------------------- */
