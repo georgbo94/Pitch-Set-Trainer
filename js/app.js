@@ -108,10 +108,18 @@ class Synth {
     this.hExp = typeof DEFAULTS.hExp === "number" ? DEFAULTS.hExp : 1.8;
 
     if (!Synth._unlockInstalled) {
-      const tryResume = () => {
-        const ctx = this._ctxOrCreate();
-        if (ctx.state !== "running") ctx.resume().catch(() => {});
-      };
+// Replace the current tryResume in the Synth constructor with this:
+const tryResume = () => {
+  const ctx = this._ctxOrCreate();
+  if (ctx && ctx.state !== "running") {
+    ctx.resume().catch(() => {});
+  }
+  // If we created the shared hidden audio element, try to unpause it too.
+  try {
+    const audioEl = Synth.sharedAudioEl;
+    if (audioEl && audioEl.paused) audioEl.play().catch(() => {});
+  } catch (e) { /* ignore */ }
+};
       window.addEventListener("pointerdown", tryResume, { passive: true });
       window.addEventListener("keydown", tryResume);
       document.addEventListener("visibilitychange", tryResume);
@@ -145,6 +153,33 @@ class Synth {
       limiter.release.value = 0.25;
 
       pre.connect(limiter).connect(ctx.destination);
+
+       // --- insert this inside _ctxOrCreate() after `pre.connect(limiter).connect(ctx.destination);`
+try {
+  // Create a MediaStreamDestination and hidden audio element (helps iOS keep audio alive)
+  const msd = ctx.createMediaStreamDestination();
+  pre.connect(msd);                  // route the final pre-master into the stream
+  Synth.sharedMSD = msd;
+
+  // Create one shared hidden audio element that plays the stream
+  const audioEl = document.createElement('audio');
+  audioEl.id = '__synth_shared_audio';
+  audioEl.playsInline = true;
+  audioEl.autoplay = false;
+  audioEl.setAttribute('webkit-playsinline', '');
+  audioEl.style.position = 'fixed';
+  audioEl.style.left = '-9999px';
+  audioEl.style.width = '1px';
+  audioEl.style.height = '1px';
+  audioEl.srcObject = msd.stream;
+  // append but keep visually hidden — we rely on user gesture to start it
+  document.body && document.body.appendChild(audioEl);
+  Synth.sharedAudioEl = audioEl;
+} catch (e) {
+  // Non-fatal; if the browser doesn't support MediaStreamDestination or srcObject, ignore
+  console.warn('[audio] MediaStreamDestination/audio shim unavailable:', e);
+}
+       
 
       Synth.sharedPreMaster = pre;
       Synth.sharedLimiter = limiter;
