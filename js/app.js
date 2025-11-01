@@ -117,6 +117,17 @@ class Synth {
       document.addEventListener("visibilitychange", tryResume);
       Synth._unlockInstalled = true;
     }
+     document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    try {
+      const ctx = this._ctxOrCreate();
+      if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+      this.stopAll(); // clear any half-dead nodes
+    } catch (e) {
+      console.warn('[audio] resume on visible failed', e);
+    }
+  }
+});
   }
 
   _ctxOrCreate() {
