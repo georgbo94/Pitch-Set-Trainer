@@ -1,52 +1,112 @@
+/* sw.js.liquid */
+
 var GHPATH = '/Pitch-Set-Trainer';
 var APP_PREFIX = 'pst_';
 var VERSION = 'version_{{ site.time | date: "%Y%m%d%H%M%S" }}';
-var URLS = [    
+
+var CACHE_NAME = APP_PREFIX + VERSION;
+
+var URLS = [
   `${GHPATH}/`,
   `${GHPATH}/index.html`,
+  `${GHPATH}/manifest.webmanifest`,
   `${GHPATH}/icons/icon-192.png`,
   `${GHPATH}/icons/icon-512.png`,
-  `${GHPATH}/js/app.js`
-]
+  `${GHPATH}/js/app.js`,
 
-var CACHE_NAME = APP_PREFIX + VERSION
-self.addEventListener('fetch', function (e) {
-  console.log('Fetch request : ' + e.request.url);
-  e.respondWith(
-    caches.match(e.request).then(function (request) {
-      if (request) { 
-        console.log('Responding with cache : ' + e.request.url);
-        return request
-      } else {       
-        console.log('File is not cached, fetching : ' + e.request.url);
-        return fetch(e.request)
-      }
-    })
-  )
-})
+  // If you self-host soundfont-player (recommended), add this and update index.html:
+  // `${GHPATH}/vendor/soundfont-player.js`,
+];
 
+// --- INSTALL: precache app shell
 self.addEventListener('install', function (e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       console.log('Installing cache : ' + CACHE_NAME);
-      return cache.addAll(URLS)
+      return cache.addAll(URLS);
+    }).then(function () {
+      // Activate updated SW immediately
+      return self.skipWaiting();
     })
-  )
-})
+  );
+});
 
+// --- ACTIVATE: clean old caches
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keyList) {
       var cacheWhitelist = keyList.filter(function (key) {
-        return key.indexOf(APP_PREFIX)
-      })
+        // FIX: must be !== -1 (your old version was buggy)
+        return key.indexOf(APP_PREFIX) !== -1;
+      });
+
       cacheWhitelist.push(CACHE_NAME);
-      return Promise.all(keyList.map(function (key, i) {
-        if (cacheWhitelist.indexOf(key) === -1) {
-          console.log('Deleting cache : ' + keyList[i] );
-          return caches.delete(keyList[i])
-        }
-      }))
+
+      return Promise.all(
+        keyList.map(function (key) {
+          if (cacheWhitelist.indexOf(key) === -1) {
+            console.log('Deleting cache : ' + key);
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(function () {
+      // Control all open clients right away
+      return self.clients.claim();
     })
-  )
-})
+  );
+});
+
+// --- FETCH: cache-first for app, runtime-cache for soundfonts/CDN
+self.addEventListener('fetch', function (e) {
+  var req = e.request;
+
+  // Only handle GET
+  if (req.method !== 'GET') return;
+
+  var url = new URL(req.url);
+
+  // Runtime cache for SoundFont instrument files (FluidR3_GM, MusyngKite, etc.)
+  // This makes instruments available offline AFTER first load.
+  if (url.hostname === 'gleitz.github.io' && url.pathname.indexOf('/midi-js-soundfonts/') !== -1) {
+    e.respondWith(
+      caches.open(CACHE_NAME).then(async function (cache) {
+        var cached = await cache.match(req);
+        if (cached) return cached;
+
+        var resp = await fetch(req);
+        // Cache successful responses
+        try { cache.put(req, resp.clone()); } catch {}
+        return resp;
+      })
+    );
+    return;
+  }
+
+  // Optional: runtime-cache soundfont-player if you still load it from unpkg
+  if (url.hostname === 'unpkg.com' && url.pathname.indexOf('/soundfont-player/') !== -1) {
+    e.respondWith(
+      caches.open(CACHE_NAME).then(async function (cache) {
+        var cached = await cache.match(req);
+        if (cached) return cached;
+
+        var resp = await fetch(req);
+        try { cache.put(req, resp.clone()); } catch {}
+        return resp;
+      })
+    );
+    return;
+  }
+
+  // Default: cache-first for everything else (your original behavior)
+  e.respondWith(
+    caches.match(req).then(function (cached) {
+      if (cached) {
+        console.log('Responding with cache : ' + req.url);
+        return cached;
+      }
+      console.log('File is not cached, fetching : ' + req.url);
+      return fetch(req);
+    })
+  );
+});
