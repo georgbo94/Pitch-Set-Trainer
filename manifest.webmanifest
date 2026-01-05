@@ -8,6 +8,11 @@
   "theme_color": "#ffffff",
   "display": "standalone", 
   "icons": [
+    {
+  "src": "/Pitch-Set-Trainer/icons/icon-192.png",
+  "type": "image/png",
+  "sizes": "192x192"
+},
       {
         "src": "/Pitch-Set-Trainer/icons/icon-512.png",
         "type": "image/png",
