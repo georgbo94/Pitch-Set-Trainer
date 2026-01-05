@@ -971,43 +971,30 @@ class Trainer {
       correct: 0
     }));
 
-    // migrate previous stats if possible
-    if (this._cacheKeys && this._statsByIndex) {
-      for (let i=0; i<this._cacheKeys.length; i++) {
-        const oldKey = this._cacheKeys[i];
-        const newIdx = newMap.get(oldKey);
-        if (newIdx !== undefined && this._statsByIndex[i]) {
-          const oldBuf = this._statsByIndex[i].buffer || [];
-          const buf = oldBuf.slice(-WIN);
-          newStats[newIdx].buffer = buf;
-          newStats[newIdx].correct = buf.reduce((a,b)=>a+b,0);
-        }
-      }
-    }
 
-    // Fill from logs if any missing
-    if (this.log && Array.isArray(this.log) && this.log.length > 0) {
-      const remaining = new Set();
-      for (let i=0; i<N; i++) {
-        if (newStats[i].buffer.length < WIN) remaining.add(i);
-      }
-      if (remaining.size > 0) {
-        for (let i=this.log.length-1; i>=0 && remaining.size>0; i--) {
-          const entry = this.log[i];
-          if (!entry || !entry.rel) continue;
-          const k = keyRel(entry.rel);
-          const idx = newMap.get(k);
-          if (idx === undefined) continue;
-          const s = newStats[idx];
-          if (s.buffer.length < WIN) {
-            s.buffer.unshift(entry.ok ? 1 : 0);
-            if (s.buffer.length > WIN) s.buffer.pop();
-            s.correct = s.buffer.reduce((a,b)=>a+b,0);
-            if (s.buffer.length >= WIN) remaining.delete(idx);
-          }
-        }
-      }
+// Recompute stats ONLY from the currently active log (mode-specific)
+if (this.log && Array.isArray(this.log) && this.log.length > 0) {
+  const remaining = new Set([...Array(N).keys()]);
+
+  for (let i = this.log.length - 1; i >= 0 && remaining.size > 0; i--) {
+    const entry = this.log[i];
+    if (!entry?.rel) continue;
+
+    const idx = newMap.get(keyRel(entry.rel));
+    if (idx === undefined) continue;
+
+    const st = newStats[idx];
+    if (st.buffer.length < WIN) {
+      st.buffer.unshift(entry.ok ? 1 : 0);
+      if (st.buffer.length === WIN) remaining.delete(idx);
     }
+  }
+}
+
+// finalize correct counts
+for (const st of newStats) {
+  st.correct = st.buffer.reduce((a, b) => a + b, 0);
+}
 
     this._cacheKeys = newKeys;
     this._cacheKeyToIndex = newMap;
@@ -1504,31 +1491,7 @@ snapshotForSave() {
     });
 
 
-    function evaluateSequence(str) {
-      const tokens = str.match(/\d+|\^/g);
-      if (!tokens) return str;
 
-      const result = [];
-      let pendingCarets = 0;
-
-      for (const tok of tokens) {
-        if (tok === "^") {
-          pendingCarets++;
-          continue;
-        }
-        let n = parseInt(tok,10);
-        if (result.length > 0) {
-          while (n <= result[result.length-1]) n += 12;
-        }
-        if (pendingCarets > 0) {
-          n += 12 * pendingCarets;
-          pendingCarets = 0;
-        }
-        result.push(n);
-      }
-      return result.join(" ");
-    }
-  }
 
 function computeRanges(s) {
   const ranges = {};
@@ -1943,11 +1906,39 @@ function updateFeedback(ok, truth, guess) {
     }
   }
 
+    function evaluateSequence(str) {
+      const tokens = str.match(/\d+|\^/g);
+      if (!tokens) return str;
+
+      const result = [];
+      let pendingCarets = 0;
+
+      for (const tok of tokens) {
+        if (tok === "^") {
+          pendingCarets++;
+          continue;
+        }
+        let n = parseInt(tok,10);
+        if (result.length > 0) {
+          while (n <= result[result.length-1]) n += 12;
+        }
+        if (pendingCarets > 0) {
+          n += 12 * pendingCarets;
+          pendingCarets = 0;
+        }
+        result.push(n);
+      }
+      return result.join(" ");
+    }
+  }
+
   function handleSubmit() {
     if (el.submitBtn.disabled) return;
 
     const cur = trainer.current;
     if (!cur) return;
+
+    el.guessInput.value = evaluateSequence(el.guessInput.value || "");
 
     if (!cur.answered) {
       const res = trainer.submitGuess(el.guessInput.value || "");
