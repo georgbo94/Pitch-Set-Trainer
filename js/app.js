@@ -207,7 +207,7 @@ class SFSampler {
   this.instr = await Soundfont.instrument(this.ctx, name, {
     gain,
     format: "mp3",
-    soundfont: "FluidR3_GM"
+    soundfont: "MusyngKite"
 });  }
 
   stopAll() {
