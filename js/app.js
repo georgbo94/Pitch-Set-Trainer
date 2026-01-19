@@ -1237,35 +1237,61 @@ playGuess(guessRel) {
   const every = Math.max(1, Math.floor(ENGINE.arpEvery));
 
   const root = this.current.root;
-  const playable = guessRel
 
+  // IMPORTANT: convert offsets -> MIDI
+  const raw = guessRel.map(r => root + r);
+
+  // choose octave shift (0, -12, +12) with your priorities
+  const muA = this.current.midis.reduce((a,b)=>a+b,0) / this.current.midis.length;
+
+  let best = null;
+  let bestCount = -1;
+  let bestDist = Infinity;
+
+  for (const k of [-1, 0, 1]) {
+    const shifted = raw.map(m => m + 12*k);
+    const playable = shifted.filter(m => m >= s.midiLow && m <= s.midiHigh);
+    if (!playable.length) continue;
+
+    const count = playable.length;
+    const muP = playable.reduce((a,b)=>a+b,0) / count;
+    const dist = Math.abs(muA - muP);
+
+    // 1) keep most notes, 2) then closest mean
+    if (count > bestCount || (count === bestCount && dist < bestDist)) {
+      best = playable;
+      bestCount = count;
+      bestDist = dist;
+    }
+  }
+
+  if (!best || !best.length) return;
+
+  best.sort((a,b)=>a-b);
+
+  // --- now reuse your existing replay cycle logic, but with `best`
   if (!this.current.answered) {
-    playEngineChord(playable, ENGINE.duration, this.current.gains);
+    playEngineChord(best, ENGINE.duration, this.current.gains);
     return;
   }
 
   this._replayGuessCount = (this._replayGuessCount || 0) + 1;
 
   if (!tonal) {
-    // atonal: identical to replay()
     const isEnd = (this._replayGuessCount % every === 0);
-    if (isEnd) playEngineArp(playable, ENGINE.arpNoteDur, this.current.gains);
-    else       playEngineChord(playable, ENGINE.duration, this.current.gains);
+    if (isEnd) playEngineArp(best, ENGINE.arpNoteDur, this.current.gains);
+    else       playEngineChord(best, ENGINE.duration, this.current.gains);
     return;
   }
 
   const full = every + 1;
   const pos  = this._replayGuessCount % full;
 
-  if (pos === 0) {
-    playKeyCenterChord(this);
-    return;
-  }
+  if (pos === 0) { playKeyCenterChord(this); return; }
+  if (pos === every) { playEngineArp(best, ENGINE.arpNoteDur, this.current.gains); return; }
 
-  if (pos === every) {
-    playEngineArp(playable, ENGINE.arpNoteDur, this.current.gains);
-    return;
-  }
+  playEngineChord(best, ENGINE.duration, this.current.gains);
+}
 
   playEngineChord(playable, ENGINE.duration, this.current.gains);
 }
@@ -1294,8 +1320,7 @@ nums = Array.from(new Set(nums)).sort((a,b)=>a-b);
   this.current.answered = true;
 
   const entry = { rel: truth, guess: nums, ok };
-  this.log.push(entry);
-
+  this.logs[tag].push(entry);
   this._buildCacheIfNeeded();
 
   const k = keyRel(truth);
@@ -1598,8 +1623,19 @@ function computeRanges(s) {
       else tag = s.tonalitySelect;
 
       if (!trainer.logs[tag]) trainer.logs[tag] = [];
-      trainer.log = trainer.logs[tag];
+const t = trainer.settings.tonalitySelect;
 
+      if (t === "M. chr.") {
+        trainer.log = (trainer.logs["M. dia."] || [])
+          .concat(trainer.logs["M. chr."] || []);
+      }
+      else if (t === "m. chr.") {
+        trainer.log = (trainer.logs["m. dia."] || [])
+          .concat(trainer.logs["m. chr."] || []);
+      }
+      else {
+        trainer.log = trainer.logs[tag];
+      }
       trainer.changeSettings(s);
 
       if (id === "keySelect" || id === "tonalitySelect") {
