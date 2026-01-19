@@ -1229,10 +1229,6 @@ playGuess(guessRel) {
 
   const root = this.current.root;
   const playable = guessRel
-    .map(r => root + r)
-    .filter(m => m >= s.midiLow && m <= s.midiHigh);
-
-  if (!playable.length) return;
 
   if (!this.current.answered) {
     playEngineChord(playable, ENGINE.duration, this.current.gains);
