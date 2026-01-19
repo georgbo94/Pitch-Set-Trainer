@@ -1235,41 +1235,44 @@ playGuess(guessRel) {
   const s = this.settings;
   const tonal = (s.tonality === "random" || s.tonality === "fixed");
   const every = Math.max(1, Math.floor(ENGINE.arpEvery));
-
   const root = this.current.root;
 
-  // IMPORTANT: convert offsets -> MIDI
+  // offsets -> MIDI always
   const raw = guessRel.map(r => root + r);
 
-  // choose octave shift (0, -12, +12) with your priorities
-  const muA = this.current.midis.reduce((a,b)=>a+b,0) / this.current.midis.length;
+  // always hard-filter
+  let best = raw.filter(m => m >= s.midiLow && m <= s.midiHigh);
+  if (!best.length) return;
 
-  let best = null;
-  let bestCount = -1;
-  let bestDist = Infinity;
+  // tonal-only: optional octave mean selection
+  if (tonal) {
+    const muA = this.current.midis.reduce((a,b)=>a+b,0) / this.current.midis.length;
 
-  for (const k of [-1, 0, 1]) {
-    const shifted = raw.map(m => m + 12*k);
-    const playable = shifted.filter(m => m >= s.midiLow && m <= s.midiHigh);
-    if (!playable.length) continue;
+    let bestCount = -1;
+    let bestDist = Infinity;
+    let bestCand = null;
 
-    const count = playable.length;
-    const muP = playable.reduce((a,b)=>a+b,0) / count;
-    const dist = Math.abs(muA - muP);
+    for (const k of [-1, 0, 1]) {
+      const shifted = raw.map(m => m + 12*k);
+      const cand = shifted.filter(m => m >= s.midiLow && m <= s.midiHigh);
+      if (!cand.length) continue;
 
-    // 1) keep most notes, 2) then closest mean
-    if (count > bestCount || (count === bestCount && dist < bestDist)) {
-      best = playable;
-      bestCount = count;
-      bestDist = dist;
+      const count = cand.length;
+      const muP = cand.reduce((a,b)=>a+b,0) / count;
+      const dist = Math.abs(muA - muP);
+
+      if (count > bestCount || (count === bestCount && dist < bestDist)) {
+        bestCand = cand;
+        bestCount = count;
+        bestDist = dist;
+      }
     }
-  }
 
-  if (!best || !best.length) return;
+    if (bestCand && bestCand.length) best = bestCand;
+  }
 
   best.sort((a,b)=>a-b);
 
-  // --- now reuse your existing replay cycle logic, but with `best`
   if (!this.current.answered) {
     playEngineChord(best, ENGINE.duration, this.current.gains);
     return;
@@ -1293,8 +1296,7 @@ playGuess(guessRel) {
   playEngineChord(best, ENGINE.duration, this.current.gains);
 }
 
-  playEngineChord(playable, ENGINE.duration, this.current.gains);
-}
+
   submitGuess(text) {
   if (!this.current || this.current.answered) return null;
 
@@ -1320,6 +1322,13 @@ nums = Array.from(new Set(nums)).sort((a,b)=>a-b);
   this.current.answered = true;
 
   const entry = { rel: truth, guess: nums, ok };
+
+  let tag;
+  if (this.settings.keySelect === "atonal") tag = "ATONAL";
+  else tag = this.settings.tonalitySelect;
+  
+  if (!this.logs[tag]) this.logs[tag] = [];
+    
   this.logs[tag].push(entry);
   this._buildCacheIfNeeded();
 
