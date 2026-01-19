@@ -830,18 +830,27 @@ function generateUniverse(settingsRaw) {
 
   const base = [];
 
-  function build(seq, next, left) {
-    if (!left) {
-      const sp = seq[seq.length - 1];
-      if (sp >= spanMin && sp <= spanMax) base.push(seq.slice());
-      return;
+function build(seq, next, left) {
+  if (!left) {
+    const sp = seq[seq.length - 1];
+
+    // cardinality 1 → ignore span
+    if (seq.length === 1) {
+      base.push(seq.slice());
+    } else {
+      if (sp >= spanMin && sp <= spanMax) {
+        base.push(seq.slice());
+      }
     }
-    for (let v = next; v <= spanMax; v++) {
-      seq.push(v);
-      build(seq, v + 1, left - 1);
-      seq.pop();
-    }
+    return;
   }
+  for (let v = next; v <= spanMax; v++) {
+    seq.push(v);
+    build(seq, v + 1, left - 1);
+    seq.pop();
+  }
+}
+
 
   for (let c = cMin; c <= cMax; c++) build([0], 1, c - 1);
 
