@@ -980,13 +980,20 @@ class Trainer {
       correct: 0
     }));
 
+const remaining = new Set([...Array(N).keys()]);
 
-// Recompute stats ONLY from the currently active log (mode-specific)
-if (this.log && Array.isArray(this.log) && this.log.length > 0) {
-  const remaining = new Set([...Array(N).keys()]);
+const t = this.settings.tonalitySelect;
 
-  for (let i = this.log.length - 1; i >= 0 && remaining.size > 0; i--) {
-    const entry = this.log[i];
+const logsToRead =
+  (t === "M. chr.")
+    ? [ this.logs["M. chr."] || [], this.logs["M. dia."] || [] ]
+  : (t === "m. chr.")
+    ? [ this.logs["m. chr."] || [], this.logs["m. dia."] || [] ]
+  : [ this.log || [] ];
+
+for (const log of logsToRead) {
+  for (let i = log.length - 1; i >= 0 && remaining.size > 0; i--) {
+    const entry = log[i];
     if (!entry?.rel) continue;
 
     const idx = newMap.get(keyRel(entry.rel));
@@ -999,6 +1006,7 @@ if (this.log && Array.isArray(this.log) && this.log.length > 0) {
     }
   }
 }
+
 
 // finalize correct counts
 for (const st of newStats) {
