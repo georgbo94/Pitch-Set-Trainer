@@ -1642,17 +1642,8 @@ function computeRanges(s) {
       if (!trainer.logs[tag]) trainer.logs[tag] = [];
 const t = trainer.settings.tonalitySelect;
 
-      if (t === "M. chr.") {
-        trainer.log = (trainer.logs["M. dia."] || [])
-          .concat(trainer.logs["M. chr."] || []);
-      }
-      else if (t === "m. chr.") {
-        trainer.log = (trainer.logs["m. dia."] || [])
-          .concat(trainer.logs["m. chr."] || []);
-      }
-      else {
-        trainer.log = trainer.logs[tag];
-      }
+trainer.log = trainer.logs[tag];
+
       trainer.changeSettings(s);
 
       if (id === "keySelect" || id === "tonalitySelect") {
