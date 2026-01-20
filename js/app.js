@@ -985,9 +985,9 @@ const remaining = new Set([...Array(N).keys()]);
 const t = this.settings.tonalitySelect;
 
 const logsToRead =
-  (t === "M. chr.")
+  (this.settings.keySelect !== "atonal" && t === "M. chr.")
     ? [ this.logs["M. chr."] || [], this.logs["M. dia."] || [] ]
-  : (t === "m. chr.")
+  : (this.settings.keySelect !== "atonal" && t === "m. chr.")
     ? [ this.logs["m. chr."] || [], this.logs["m. dia."] || [] ]
   : [ this.log || [] ];
 
