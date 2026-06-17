@@ -10,26 +10,211 @@ const MIDI_ABS_HIGH = 100;
 
 const TONALITY_MODES = {
   "root": {
+    family: "root",
     tonicChord: [0],
     allowedPCs: new Set([0,1,2,3,4,5,6,7,8,9,10,11])
   },
 
   "M. dia.": {
+    family: "major",
     tonicChord: [0,4,7,12],
     allowedPCs: new Set([0,2,4,5,7,9,11])   // major diatonic
   },
 
+  "M. b7": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,4,5,7,9,10,11])
+  },
+
+  "M. b6": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,4,5,7,8,9,11])
+  },
+
+  "M. #4": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,4,5,6,7,9,11])
+  },
+
+  "M. b3": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,3,4,5,7,9,11])
+  },
+
+  "M. b2": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,1,2,4,5,7,9,11])
+  },
+
+  "M. b7b6": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,4,5,7,8,9,10,11])
+  },
+
+  "M. b7#4": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,4,5,6,7,9,10,11])
+  },
+
+  "M. b7b3": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,3,4,5,7,9,10,11])
+  },
+
+  "M. b7b2": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,1,2,4,5,7,9,10,11])
+  },
+
+  "M. b6#4": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,4,5,6,7,8,9,11])
+  },
+
+  "M. b6b3": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,3,4,5,7,8,9,11])
+  },
+
+  "M. b6b2": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,1,2,4,5,7,8,9,11])
+  },
+
+  "M. #4b3": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,2,3,4,5,6,7,9,11])
+  },
+
+  "M. #4b2": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,1,2,4,5,6,7,9,11])
+  },
+
+  "M. b3b2": {
+    family: "major",
+    tonicChord: [0,4,7,12],
+    allowedPCs: new Set([0,1,2,3,4,5,7,9,11])
+  },
+
   "m. dia.": {
+    family: "minor",
     tonicChord: [0,3,7,12],
     allowedPCs: new Set([0,2,3,5,7,8,10])   // natural minor
   },
 
+  "m. 7": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,5,7,8,10,11])
+  },
+
+  "m. 3": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,4,5,7,8,10])
+  },
+
+  "m. 6": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,5,7,8,9,10])
+  },
+
+  "m. #4": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,5,6,7,8,10])
+  },
+
+  "m. b2": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,1,2,3,5,7,8,10])
+  },
+
+  "m. 73": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,4,5,7,8,10,11])
+  },
+
+  "m. 76": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,5,7,8,9,10,11])
+  },
+
+  "m. 7#4": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,5,6,7,8,10,11])
+  },
+
+  "m. 7b2": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,1,2,3,5,7,8,10,11])
+  },
+
+  "m. 36": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,4,5,7,8,9,10])
+  },
+
+  "m. 3#4": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,4,5,6,7,8,10])
+  },
+
+  "m. 3b2": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,1,2,3,4,5,7,8,10])
+  },
+
+  "m. 6#4": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,2,3,5,6,7,8,9,10])
+  },
+
+  "m. 6b2": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,1,2,3,5,7,8,9,10])
+  },
+
+  "m. #4b2": {
+    family: "minor",
+    tonicChord: [0,3,7,12],
+    allowedPCs: new Set([0,1,2,3,5,6,7,8,10])
+  },
+
   "M. chr.": {
+    family: "major",
     tonicChord: [0,4,7,12],
     allowedPCs: new Set([0,1,2,3,4,5,6,7,8,9,10,11])  // chromatic
   },
 
   "m. chr.": {
+    family: "minor",
     tonicChord: [0,3,7,12],
     allowedPCs: new Set([0,1,2,3,4,5,6,7,8,9,10,11])  // chromatic
   }
@@ -77,8 +262,55 @@ const DEFAULTS = {
 const STORAGE = {
   CURRENT_USER: "pitchsettrainer_current_user",
   USER_PREFIX: "pitchsettrainer_user_",
-  LAST_NON_GUEST_SETTINGS: "pitchsettrainer_last_non_guest_settings"
+  LAST_NON_GUEST_SETTINGS: "pitchsettrainer_last_non_guest_settings",
+  MIGRATION_BACKUP_PREFIX: "pitchsettrainer_bucket_migration_backup_"
 };
+
+const LOG_BUCKET_ALIASES = {
+  ATONAL: "atonal",
+  atonal: "atonal",
+  root: "root",
+  "M. dia.": "major",
+  "M. chr.": "major",
+  major: "major",
+  "m. dia.": "minor",
+  "m. chr.": "minor",
+  minor: "minor"
+};
+
+function logBucketForSettings(settings) {
+  if (!settings || settings.keySelect === "atonal") return "atonal";
+  return TONALITY_MODES[settings.tonalitySelect]?.family || "root";
+}
+
+function normalizeLogs(logs, legacyLog = null) {
+  const normalized = { atonal: [], root: [], major: [], minor: [] };
+
+  const append = (bucket, entries) => {
+    if (!bucket || !Array.isArray(entries)) return;
+    if (!normalized[bucket]) normalized[bucket] = [];
+    normalized[bucket].push(...entries);
+  };
+
+  if (logs && typeof logs === "object") {
+    append("atonal", logs.ATONAL);
+    append("atonal", logs.atonal);
+    append("root", logs.root);
+
+    append("major", logs["M. dia."]);
+    append("major", logs["M. chr."]);
+    append("major", logs.major);
+
+    append("minor", logs["m. dia."]);
+    append("minor", logs["m. chr."]);
+    append("minor", logs.minor);
+
+  }
+
+  append("atonal", legacyLog);
+
+  return normalized;
+}
 
 /* -------------------------
    Storage Implementation
@@ -100,11 +332,13 @@ const Storage = {
 save(user, data) {
   if (user === "Guest") return;
 
+  const logs = normalizeLogs(data.logs);
+
   localStorage.setItem(
     STORAGE.USER_PREFIX + user,
     JSON.stringify({
       settings: data.settings,
-      logs: data.logs,
+      logs,
       section: data.section ?? "synth"    })
   );
 
@@ -124,32 +358,27 @@ save(user, data) {
       const settings = raw
         ? { ...DEFAULTS, ...JSON.parse(raw) }
         : { ...DEFAULTS };
-      return { settings, logs: {} };
+      return { settings, logs: normalizeLogs({}) };
     }
 
     const raw = localStorage.getItem(STORAGE.USER_PREFIX + user);
-    if (!raw) return { settings: { ...DEFAULTS }, logs: {} };
+    if (!raw) return { settings: { ...DEFAULTS }, logs: normalizeLogs({}) };
 
     try {
       const parsed = JSON.parse(raw);
+      const backupKey = STORAGE.MIGRATION_BACKUP_PREFIX + user;
+      if (!localStorage.getItem(backupKey)) {
+        localStorage.setItem(backupKey, raw);
+      }
+
       const settings = { ...DEFAULTS, ...(parsed.settings || {}) };
       const section = parsed.section || "synth";
 
-      
-      // MIGRATION logic 
-      let logs = parsed.logs;
-      if (!logs) {
-        logs = {};
-        if (Array.isArray(parsed.log)) {
-          logs.ATONAL = parsed.log.slice();
-        } else {
-          logs.ATONAL = [];
-        }
-      }
+      const logs = normalizeLogs(parsed.logs, parsed.log);
 
       return { settings, logs, section };
     } catch {
-      return { settings: { ...DEFAULTS }, logs: { ATONAL: [] } };
+      return { settings: { ...DEFAULTS }, logs: normalizeLogs({}) };
     }
   },
 
@@ -788,7 +1017,7 @@ function playKeyCenterChord(trainer) {
 
 function resolveTonality(settings) {
   const s = { ...settings };
-  const validModes = ["root","M. dia.","m. dia.","M. chr.","m. chr."];
+  const validModes = Object.keys(TONALITY_MODES);
 
   if (!validModes.includes(s.tonalitySelect)) {
     s.tonalitySelect = "root";
@@ -982,14 +1211,7 @@ class Trainer {
 
 const remaining = new Set([...Array(N).keys()]);
 
-const t = this.settings.tonalitySelect;
-
-const logsToRead =
-  (this.settings.keySelect !== "atonal" && t === "M. chr.")
-    ? [ this.logs["M. chr."] || [], this.logs["M. dia."] || [] ]
-  : (this.settings.keySelect !== "atonal" && t === "m. chr.")
-    ? [ this.logs["m. chr."] || [], this.logs["m. dia."] || [] ]
-  : [ this.log || [] ];
+const logsToRead = [this.log || []];
 
 for (const log of logsToRead) {
   for (let i = log.length - 1; i >= 0 && remaining.size > 0; i--) {
@@ -1331,9 +1553,7 @@ nums = Array.from(new Set(nums)).sort((a,b)=>a-b);
 
   const entry = { rel: truth, guess: nums, ok };
 
-  let tag;
-  if (this.settings.keySelect === "atonal") tag = "ATONAL";
-  else tag = this.settings.tonalitySelect;
+  const tag = logBucketForSettings(this.settings);
   
   if (!this.logs[tag]) this.logs[tag] = [];
     
@@ -1598,7 +1818,7 @@ function computeRanges(s) {
     }
 
     el.keySelect.value = s.keySelect;
-    const modes = ["root","M. dia.","m. dia.","M. chr.","m. chr."];
+    const modes = Object.keys(TONALITY_MODES);
 
     if (!modes.includes(s.tonalitySelect)) {
       el.tonalitySelect.value = "root";   // old users → fallback
@@ -1635,12 +1855,9 @@ function computeRanges(s) {
     node.addEventListener("change", () => {
       const s = readSettingsFromUI();
 
-      let tag;
-      if (s.keySelect === "atonal") tag = "ATONAL";
-      else tag = s.tonalitySelect;
+      const tag = logBucketForSettings(s);
 
       if (!trainer.logs[tag]) trainer.logs[tag] = [];
-const t = trainer.settings.tonalitySelect;
 
 trainer.log = trainer.logs[tag];
 
@@ -1864,10 +2081,7 @@ function updateFeedback(ok, truth, guess) {
     }
 
     // select bucket
-    const keySel = trainer.settings.keySelect;
-    let tag;
-    if (keySel === "atonal") tag = "ATONAL";
-    else tag = trainer.settings.tonalitySelect;
+    const tag = logBucketForSettings(trainer.settings);
 
     if (!trainer.logs[tag]) trainer.logs[tag] = [];
 
@@ -2070,10 +2284,7 @@ function updateFeedback(ok, truth, guess) {
   trainer.changeSettings(data.settings);
   trainer.logs = data.logs || {};
 
-  const keySel = trainer.settings.keySelect;
-  let tag;
-  if (keySel === "atonal") tag = "ATONAL";
-  else tag = trainer.settings.tonalitySelect;
+  const tag = logBucketForSettings(trainer.settings);
 
   if (!trainer.logs[tag]) trainer.logs[tag] = [];
   trainer.log = trainer.logs[tag];
